@@ -1,0 +1,69 @@
+spring:
+  application:
+    name: project-service
+  profiles:
+    active: dev
+
+server:
+  port: 18083
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+
+logging:
+  pattern:
+    level: "%5p [traceId:%X{traceId:-}]"
+
+app:
+  ratelimit:
+    enabled: true
+    max-subjects: 20000
+    rules:
+      - id: project-write-post
+        path: /api/v1/projects/**
+        method: POST
+        capacity: 120
+        refill-tokens: 120
+        refill-duration-seconds: 60
+      - id: project-write-patch
+        path: /api/v1/projects/**
+        method: PATCH
+        capacity: 120
+        refill-tokens: 120
+        refill-duration-seconds: 60
+      - id: project-write-put
+        path: /api/v1/projects/**
+        method: PUT
+        capacity: 120
+        refill-tokens: 120
+        refill-duration-seconds: 60
+      - id: project-write-delete
+        path: /api/v1/projects/**
+        method: DELETE
+        capacity: 120
+        refill-tokens: 120
+        refill-duration-seconds: 60
+
+project:
+  idempotency:
+    ttl-seconds: 86400
+    cleanup:
+      enabled: true
+      initial-delay-ms: 60000
+      fixed-delay-ms: 300000
+      batch-size: 500
+      max-batches-per-run: 10

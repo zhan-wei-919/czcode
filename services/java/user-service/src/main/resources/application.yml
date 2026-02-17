@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: user-service
+  profiles:
+    active: dev
+
+server:
+  port: 18082
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+
+logging:
+  pattern:
+    level: "%5p [traceId:%X{traceId:-}]"
+
+app:
+  ratelimit:
+    enabled: true
+    max-subjects: 20000
+    rules:
+      - id: user-create
+        path: /api/v1/users
+        method: POST
+        capacity: 120
+        refill-tokens: 120
+        refill-duration-seconds: 60
+      - id: user-update
+        path: /api/v1/users/**
+        method: PATCH
+        capacity: 120
+        refill-tokens: 120
+        refill-duration-seconds: 60
+      - id: user-delete
+        path: /api/v1/users/**
+        method: DELETE
+        capacity: 120
+        refill-tokens: 120
+        refill-duration-seconds: 60
