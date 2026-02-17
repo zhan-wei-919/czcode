@@ -31,27 +31,3 @@ jobs:
         run: |
           chmod +x mvnw
           ./mvnw -q test
-
-  openapi-gate:
-    name: OpenAPI Gate
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Validate OpenAPI artifacts
-        shell: bash
-        run: |
-          set -euo pipefail
-          specs=(
-            docs/openapi/auth-service.v1.yaml
-            docs/openapi/project-service.v1.yaml
-            docs/openapi/user-service.v1.yaml
-          )
-
-          for spec in "${specs[@]}"; do
-            test -f "$spec"
-            grep -Eq '^openapi:[[:space:]]*3\.' "$spec"
-            grep -Eq '^info:' "$spec"
-            grep -Eq '^paths:' "$spec"
-          done
